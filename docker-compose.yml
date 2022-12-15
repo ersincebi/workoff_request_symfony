@@ -1,0 +1,36 @@
+version: "3.3"
+networks:
+  workoff_request_network:
+volumes:
+  workoff_request_volume:
+
+services:
+  mysql_latest:
+    image: mysql:latest
+    volumes:
+      - workoff_request_volume:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_DATABASE: workoff_request_db
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: toor
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_SERVICE_NAME: mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - workoff_request_network
+
+  debian_php8:
+    container_name: debian_php8
+    build: ./docker/debian
+    volumes:
+      - ./:/var/www/html
+      - ./docker/vhost/000-default.conf:/etc/apache2/sites-enabled/000-default.conf
+    ports:
+      - 80:80
+    extra_hosts:
+      - "workoff_request.test:127.0.0.1"
+    networks:
+      - workoff_request_network
